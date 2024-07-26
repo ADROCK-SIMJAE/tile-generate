@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Stage, Layer, Rect, Image } from "react-konva";
-import useImage from "use-image";
+import { Stage, Layer, Rect, Image as KonvaImage } from "react-konva";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 // 예제 이미지 데이터 (하드코딩된 위치와 크기)
@@ -58,8 +57,10 @@ const Tile = ({ x, y, width, height, color, onClick, isSelected }) => (
 );
 
 const TileImage = ({ x, y, width, height, src }) => {
-  const [image] = useImage(src);
-  return <Image x={x} y={y} width={width} height={height} image={image} />;
+  const img = new window.Image();
+  img.src = src;
+
+  return <KonvaImage x={x} y={y} width={width} height={height} image={img} />;
 };
 
 const TileGrid = ({
@@ -95,6 +96,16 @@ const TileGrid = ({
       <TransformComponent>
         <Stage width={canvasWidth} height={canvasHeight}>
           <Layer>
+            {images.map((image, index) => (
+              <TileImage
+                key={index}
+                x={image.x * tileWidth}
+                y={image.y * tileHeight}
+                width={image.width * tileWidth}
+                height={image.height * tileHeight}
+                src={image.src}
+              />
+            ))}
             {colors.map((row, rowIndex) =>
               row.map((color, columnIndex) => (
                 <Tile
@@ -113,16 +124,6 @@ const TileGrid = ({
                 />
               ))
             )}
-            {images.map((image, index) => (
-              <TileImage
-                key={index}
-                x={image.x * tileWidth}
-                y={image.y * tileHeight}
-                width={tileWidth * image.width}
-                height={tileHeight * image.height}
-                src={image.src}
-              />
-            ))}
           </Layer>
         </Stage>
       </TransformComponent>
